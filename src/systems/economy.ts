@@ -5,6 +5,9 @@
 
 import { GameConfig } from '../models/config';
 import { Structure } from '../models/entities';
+import { Logger } from '../utils/logger';
+
+const log = Logger.create('Economy');
 
 export type EnemyType = 'basic_enemy' | 'brute_enemy';
 
@@ -49,9 +52,11 @@ export class EconomySystem {
       return false;
     }
     if (this.gold < amount) {
+      log.warn('Deduction failed - insufficient gold', { attempted: amount, available: this.gold });
       return false;
     }
     this.gold -= amount;
+    log.debug('Gold deducted', { amount, remaining: this.gold });
     return true;
   }
 
@@ -64,6 +69,7 @@ export class EconomySystem {
       return;
     }
     this.gold += amount;
+    log.debug('Gold credited', { amount, total: this.gold });
   }
 
   /**
@@ -127,6 +133,7 @@ export class EconomySystem {
   awardBounty(enemyType: EnemyType): number {
     const bounty = this.getEnemyBounty(enemyType);
     this.credit(bounty);
+    log.info('Bounty awarded', { enemyType, bounty, totalGold: this.gold });
     return bounty;
   }
 
@@ -137,6 +144,7 @@ export class EconomySystem {
   awardWaveBonus(waveNumber: number): number {
     const bonus = this.getWaveBonusAmount(waveNumber);
     this.credit(bonus);
+    log.info('Wave bonus awarded', { waveNumber, bonus, totalGold: this.gold });
     return bonus;
   }
 

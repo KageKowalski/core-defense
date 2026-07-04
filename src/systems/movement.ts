@@ -7,6 +7,9 @@
 import { GridPosition, gridToWorld, WorldPosition } from '../models/grid';
 import { Enemy, Structure } from '../models/entities';
 import { GameConfig } from '../models/config';
+import { Logger } from '../utils/logger';
+
+const log = Logger.create('Movement');
 
 export type MovementEvent =
   | { type: 'reached_core'; enemyId: string; damage: number }
@@ -95,6 +98,7 @@ export function updateEnemyMovement(
     // Check if reached core (this is the last waypoint and it's adjacent to core)
     if (enemy.pathIndex >= enemy.path.waypoints.length - 1) {
       if (coreCells && coreCells.some(c => c.row === enemy.position.row && c.col === enemy.position.col)) {
+        log.info('Enemy reached core', { enemyId: enemy.id.slice(0, 8), enemyType: enemy.type, damage: enemy.damage });
         events.push({
           type: 'reached_core',
           enemyId: enemy.id,
@@ -103,6 +107,7 @@ export function updateEnemyMovement(
         return events;
       }
       // Reached end of path (core-adjacent)
+      log.info('Enemy reached core (end of path)', { enemyId: enemy.id.slice(0, 8), enemyType: enemy.type, damage: enemy.damage });
       events.push({
         type: 'reached_core',
         enemyId: enemy.id,
@@ -173,12 +178,22 @@ function updateBarrierAttack(
           barrier.currentHealth = 0;
           // Barrier destroyed - exit attack mode
           enemy.isAttackingBarrier = false;
+          log.info('Barrier destroyed by enemy', {
+            enemyId: enemy.id.slice(0, 8),
+            barrierId: barrier.id.slice(0, 8),
+          });
           events.push({
             type: 'barrier_destroyed',
             enemyId: enemy.id,
             barrierId: barrier.id,
           });
         } else {
+          log.debug('Barrier damaged', {
+            enemyId: enemy.id.slice(0, 8),
+            barrierId: barrier.id.slice(0, 8),
+            damage: enemy.structureDamage,
+            remainingHealth: barrier.currentHealth,
+          });
           events.push({
             type: 'barrier_damaged',
             enemyId: enemy.id,

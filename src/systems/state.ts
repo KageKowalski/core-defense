@@ -6,6 +6,9 @@
 import { EntityId, GridPosition } from '../models/grid';
 import { StructureType } from '../models/entities';
 import { GameConfig } from '../models/config';
+import { Logger } from '../utils/logger';
+
+const log = Logger.create('State');
 
 export type GamePhase = 'preparation' | 'combat' | 'game_over';
 
@@ -105,28 +108,47 @@ export class GameStateManager {
    * Dispatch a game action and return the result.
    */
   dispatch(action: GameAction): ActionResult {
+    let result: ActionResult;
+
     switch (action.type) {
       case 'START_WAVE':
-        return this.handleStartWave();
+        result = this.handleStartWave();
+        break;
       case 'RESTART_GAME':
-        return this.handleRestartGame();
+        result = this.handleRestartGame();
+        break;
       case 'DAMAGE_CORE':
-        return this.handleDamageCore(action.amount);
+        result = this.handleDamageCore(action.amount);
+        break;
       case 'ENEMY_REACHED_CORE':
-        return this.handleEnemyReachedCore(action.entityId, action.damage);
+        result = this.handleEnemyReachedCore(action.entityId, action.damage);
+        break;
       case 'ENEMY_DESTROYED':
-        return this.handleEnemyDestroyed(action.entityId, action.killedByTower);
+        result = this.handleEnemyDestroyed(action.entityId, action.killedByTower);
+        break;
       case 'PLACE_STRUCTURE':
-        return this.handlePlaceStructure(action.structureType, action.position);
+        result = this.handlePlaceStructure(action.structureType, action.position);
+        break;
       case 'SELL_STRUCTURE':
-        return this.handleSellStructure(action.entityId);
+        result = this.handleSellStructure(action.entityId);
+        break;
       case 'REPAIR_STRUCTURE':
-        return this.handleRepairStructure(action.entityId);
+        result = this.handleRepairStructure(action.entityId);
+        break;
       case 'STRUCTURE_DESTROYED':
-        return this.handleStructureDestroyed(action.entityId);
+        result = this.handleStructureDestroyed(action.entityId);
+        break;
       default:
-        return { success: false, reason: 'Unknown action type' };
+        result = { success: false, reason: 'Unknown action type' };
     }
+
+    if (result.success) {
+      log.debug('Action dispatched', { action: action.type });
+    } else {
+      log.warn('Action failed', { action: action.type, reason: result.reason });
+    }
+
+    return result;
   }
 
   private handleStartWave(): ActionResult {
@@ -140,11 +162,14 @@ export class GameStateManager {
     this.state.enemiesRemainingInWave = totalEnemies;
     this.state.totalEnemiesInWave = totalEnemies;
 
+    log.info('Wave started', { waveNumber: this.state.waveNumber, totalEnemies });
+
     return { success: true };
   }
 
   private handleRestartGame(): ActionResult {
     this.state = this.createInitialState();
+    log.info('Game restarted');
     return { success: true };
   }
 
@@ -158,10 +183,12 @@ export class GameStateManager {
     }
 
     this.state.coreHealth -= amount;
+    log.info('Core damaged', { damage: amount, remainingHealth: this.state.coreHealth });
 
     if (this.state.coreHealth <= 0) {
       this.state.coreHealth = 0;
       this.state.phase = 'game_over';
+      log.error('Core destroyed - game over', { waveNumber: this.state.waveNumber });
     }
 
     return { success: true };
@@ -178,10 +205,18 @@ export class GameStateManager {
     // Decrement enemies remaining
     this.state.enemiesRemainingInWave = Math.max(0, this.state.enemiesRemainingInWave - 1);
 
+    log.info('Enemy reached core', {
+      entityId,
+      damage,
+      coreHealth: this.state.coreHealth,
+      enemiesRemaining: this.state.enemiesRemainingInWave,
+    });
+
     // Check for game over
     if (this.state.coreHealth <= 0) {
       this.state.coreHealth = 0;
       this.state.phase = 'game_over';
+      log.error('Core destroyed - game over', { waveNumber: this.state.waveNumber });
     }
 
     return { success: true };

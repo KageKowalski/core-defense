@@ -4,6 +4,9 @@
 
 import { EntityId, GridPosition } from './grid';
 import { Structure, Enemy, Projectile, CriticalResource, Entity } from './entities';
+import { Logger } from '../utils/logger';
+
+const log = Logger.create('Entity');
 
 export interface EntityStore {
   structures: Map<EntityId, Structure>;
@@ -34,10 +37,12 @@ export function addEntity(store: EntityStore, entity: Entity): void {
     case 'sniper_tower':
     case 'aoe_tower':
       store.structures.set(entity.id, entity as Structure);
+      log.debug('Structure added', { id: entity.id.slice(0, 8), type: entity.type });
       break;
     case 'basic_enemy':
     case 'brute_enemy':
       store.enemies.set(entity.id, entity as Enemy);
+      log.debug('Enemy added', { id: entity.id.slice(0, 8), type: entity.type, totalEnemies: store.enemies.size });
       break;
     case 'projectile':
       store.projectiles.set(entity.id, entity as Projectile);
@@ -54,17 +59,22 @@ export function addEntity(store: EntityStore, entity: Entity): void {
  */
 export function removeEntity(store: EntityStore, entityId: EntityId): boolean {
   if (store.structures.has(entityId)) {
+    const entity = store.structures.get(entityId)!;
     store.structures.delete(entityId);
+    log.debug('Structure removed', { id: entityId.slice(0, 8), type: entity.type, remaining: store.structures.size });
     return true;
   }
   if (store.enemies.has(entityId)) {
+    const entity = store.enemies.get(entityId)!;
     store.enemies.delete(entityId);
+    log.debug('Enemy removed', { id: entityId.slice(0, 8), type: entity.type, remaining: store.enemies.size });
     return true;
   }
   if (store.projectiles.has(entityId)) {
     store.projectiles.delete(entityId);
     return true;
   }
+  log.warn('Attempted to remove non-existent entity', { id: entityId.slice(0, 8) });
   return false;
 }
 

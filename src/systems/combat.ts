@@ -7,6 +7,9 @@ import { GridPosition, WorldPosition, EntityId, gridToWorld } from '../models/gr
 import { Tower, Enemy, Projectile, Structure } from '../models/entities';
 import { GameConfig } from '../models/config';
 import { EntityStore, addEntity, removeEntity, getEnemiesInRange } from '../models/entity-store';
+import { Logger } from '../utils/logger';
+
+const log = Logger.create('Combat');
 
 export type CombatEvent =
   | { type: 'enemy_destroyed'; enemyId: string; killedByTower: boolean }
@@ -177,6 +180,13 @@ export class CombatSystem {
     const projectile = createProjectile(tower, target);
     addEntity(this.entityStore, projectile);
     tower.fireCooldown = 1 / tower.fireRate;
+
+    log.debug('Tower fired', {
+      towerId: tower.id.slice(0, 8),
+      towerType: tower.type,
+      targetId: target.id.slice(0, 8),
+      damage: tower.damage,
+    });
   }
 
   /**
@@ -227,9 +237,19 @@ export class CombatSystem {
             damage: projectile.damage,
           });
 
+          log.debug('AOE hit', {
+            affectedCount: affectedIds.length,
+            damage: projectile.damage,
+            radius: projectile.aoeRadius,
+          });
+
           // Check for destroyed enemies
           for (const enemy of affected) {
             if (enemy.currentHealth <= 0) {
+              log.info('Enemy destroyed (AOE)', {
+                enemyId: enemy.id.slice(0, 8),
+                enemyType: enemy.type,
+              });
               events.push({
                 type: 'enemy_destroyed',
                 enemyId: enemy.id,
@@ -248,6 +268,11 @@ export class CombatSystem {
           });
 
           if (target.currentHealth <= 0) {
+            log.info('Enemy destroyed', {
+              enemyId: target.id.slice(0, 8),
+              enemyType: target.type,
+              overkill: Math.abs(target.currentHealth),
+            });
             events.push({
               type: 'enemy_destroyed',
               enemyId: target.id,

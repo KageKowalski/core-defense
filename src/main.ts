@@ -20,13 +20,22 @@ import { VFXSystem } from './systems/vfx';
 import { UISystem } from './systems/ui-system';
 import { InputSystem } from './systems/input-system';
 import { placeStructure, sellStructure, repairStructure } from './systems/placement';
+import { Logger } from './utils/logger';
+
+const log = Logger.create('Init');
 
 // --- Initialize Game ---
 
 function initGame(): void {
+  log.info('Initializing Core Defense', {
+    gridSize: `${GameConfig.grid.width}x${GameConfig.grid.height}`,
+    startingGold: GameConfig.startingGold,
+  });
+
   // Get container element
   const container = document.getElementById('game-container');
   if (!container) {
+    log.error('Game container element not found');
     console.error('Game container not found');
     return;
   }
@@ -77,6 +86,7 @@ function initGame(): void {
   // 7. UI System
   const uiContainer = document.getElementById('ui-overlay');
   if (!uiContainer) {
+    log.error('UI overlay container element not found');
     console.error('UI overlay container not found');
     return;
   }
@@ -190,7 +200,10 @@ function initGame(): void {
 
   function handleStartWave(): void {
     const result = gameState.dispatch({ type: 'START_WAVE' });
-    if (!result.success) return;
+    if (!result.success) {
+      log.warn('Start wave failed', { reason: (result as { reason: string }).reason });
+      return;
+    }
 
     phaseManager.transitionTo('combat');
     spawnSystem.beginWave(gameState.getWaveNumber());
@@ -233,6 +246,7 @@ function initGame(): void {
   }
 
   function handleRestart(): void {
+    log.info('Game restart initiated');
     // Reset game state
     gameState.dispatch({ type: 'RESTART_GAME' });
     phaseManager.transitionTo('preparation');
@@ -387,6 +401,7 @@ function initGame(): void {
   );
 
   // Start the game
+  log.info('All systems initialized, starting game loop');
   gameLoop.start();
 }
 

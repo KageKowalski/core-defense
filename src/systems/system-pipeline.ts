@@ -13,6 +13,9 @@ import { EntityStore, removeEntity } from '../models/entity-store';
 import { updateEnemyMovement, MovementEvent } from './movement';
 import { Grid } from '../models/grid';
 import { Structure } from '../models/entities';
+import { Logger } from '../utils/logger';
+
+const log = Logger.create('Pipeline');
 
 export interface SystemPipelineConfig {
   gameState: GameStateManager;
@@ -64,6 +67,7 @@ export class SystemPipeline {
   }
 
   private emit(event: PipelineEvent): void {
+    log.info('Pipeline event', { eventType: event.type });
     for (const cb of this.eventCallbacks) {
       cb(event);
     }
@@ -193,6 +197,8 @@ export class SystemPipeline {
     // Trigger path recalculation
     this.pathfindingSystem.markDirty();
 
+    log.info('Barrier destroyed', { barrierId, position: { row, col } });
+
     // Dispatch
     this.gameState.dispatch({ type: 'STRUCTURE_DESTROYED', entityId: barrierId });
     this.emit({ type: 'structure_destroyed', structureId: barrierId });
@@ -206,6 +212,11 @@ export class SystemPipeline {
     const enemiesToSpawn = this.spawnSystem.getEnemiesRemainingToSpawn();
 
     if (enemiesAlive === 0 && enemiesToSpawn === 0 && !this.spawnSystem.isActive()) {
+      log.info('Wave complete', {
+        waveNumber: this.gameState.getWaveNumber(),
+        enemiesAlive,
+        enemiesToSpawn,
+      });
       this.emit({ type: 'wave_complete' });
     }
   }
