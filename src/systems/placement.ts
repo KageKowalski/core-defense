@@ -147,22 +147,22 @@ export function createStructureEntity(
     case 'basic_tower':
     case 'sniper_tower':
     case 'aoe_tower': {
-      const towerConfig = config as typeof GameConfig.structures.basic_tower;
+      const towerConfig = GameConfig.structures[structureType];
       const tower: Tower = {
         id: entityId,
         type: structureType,
         position,
         worldPosition,
-        maxHealth: config.maxHealth,
-        currentHealth: config.maxHealth,
-        originalCost: config.cost,
-        range: towerConfig.range,
-        damage: towerConfig.damage,
-        fireRate: towerConfig.fireRate,
+        maxHealth: towerConfig.maxHealth,
+        currentHealth: towerConfig.maxHealth,
+        originalCost: towerConfig.cost,
+        range: 'range' in towerConfig ? towerConfig.range : 3,
+        damage: 'damage' in towerConfig ? towerConfig.damage : 15,
+        fireRate: 'fireRate' in towerConfig ? towerConfig.fireRate : 1,
         fireCooldown: 0,
         targetId: null,
-        targetingPriority: towerConfig.targetingPriority,
-        ...('aoeRadius' in towerConfig ? { aoeRadius: towerConfig.aoeRadius } : {}),
+        targetingPriority: 'targetingPriority' in towerConfig ? towerConfig.targetingPriority : 'closest_to_core',
+        aoeRadius: 'aoeRadius' in towerConfig ? (towerConfig as typeof GameConfig.structures.aoe_tower).aoeRadius : undefined,
       };
       return tower;
     }
