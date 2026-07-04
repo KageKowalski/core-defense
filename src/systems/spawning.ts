@@ -8,6 +8,9 @@ import { Enemy, BasicEnemy, BruteEnemy } from '../models/entities';
 import { GameConfig } from '../models/config';
 import { EntityStore, addEntity } from '../models/entity-store';
 import { PathfindingSystem } from './pathfinding';
+import { Logger } from '../utils/logger';
+
+const log = Logger.create('Spawn');
 
 export type SpawnEdge = 'top' | 'bottom' | 'left' | 'right';
 
@@ -228,6 +231,15 @@ export class SpawnSystem {
       interval: composition.spawnInterval,
       active: true,
     };
+
+    log.info('Wave spawning started', {
+      waveNumber,
+      basicCount: composition.basicCount,
+      bruteCount: composition.bruteCount,
+      totalCount: composition.totalCount,
+      interval: composition.spawnInterval,
+      edges,
+    });
   }
 
   /**
@@ -269,9 +281,16 @@ export class SpawnSystem {
 
     // If pathfinding fails from initial position, try alternative spawn positions
     if (!path) {
+      log.warn('Pathfinding failed from spawn position, trying alternatives', {
+        edge,
+        position,
+        enemyType,
+      });
       path = this.tryAlternativeSpawnPositions(edge);
       if (path) {
         position = path.waypoints[0];
+      } else {
+        log.error('All spawn positions failed pathfinding', { edge, enemyType });
       }
     }
 
@@ -281,6 +300,15 @@ export class SpawnSystem {
 
     addEntity(this.entityStore, enemy);
     this.spawnState.index++;
+
+    log.debug('Enemy spawned', {
+      id: id.slice(0, 8),
+      type: enemyType,
+      edge,
+      position,
+      hasPath: !!path,
+      remaining: this.spawnState.queue.length - this.spawnState.index,
+    });
   }
 
   /**

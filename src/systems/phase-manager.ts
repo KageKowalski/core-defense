@@ -4,6 +4,9 @@
  */
 
 import { GamePhase } from './state';
+import { Logger } from '../utils/logger';
+
+const log = Logger.create('Phase');
 
 export type PhaseCallback = () => void;
 
@@ -67,6 +70,7 @@ export class PhaseManager {
     const previousPhase = this.currentPhase;
 
     if (!this.isValidTransition(previousPhase, newPhase)) {
+      log.warn('Invalid phase transition attempted', { from: previousPhase, to: newPhase });
       return { success: false, previousPhase, newPhase };
     }
 
@@ -78,6 +82,8 @@ export class PhaseManager {
 
     // Fire enter callbacks for new phase
     this.fireEnterCallbacks(newPhase);
+
+    log.info('Phase transition', { from: previousPhase, to: newPhase });
 
     return { success: true, previousPhase, newPhase };
   }
