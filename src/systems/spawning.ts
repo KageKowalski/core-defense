@@ -72,7 +72,9 @@ export function selectSpawnEdges(rng?: () => number): SpawnEdge[] {
 }
 
 /**
- * Returns a spawn position outside the visible grid (1 cell beyond the edge).
+ * Returns a spawn position on the edge of the grid.
+ * Enemies spawn on the outermost walkable row/column so that
+ * pathfinding can immediately compute a valid path to the core.
  * @param edge - Which edge to spawn from
  * @param gridWidth - Width of the grid
  * @param gridHeight - Height of the grid
@@ -88,13 +90,13 @@ export function getSpawnPosition(
 
   switch (edge) {
     case 'top':
-      return { row: -1, col: Math.floor(random() * gridWidth) };
+      return { row: 0, col: Math.floor(random() * gridWidth) };
     case 'bottom':
-      return { row: gridHeight, col: Math.floor(random() * gridWidth) };
+      return { row: gridHeight - 1, col: Math.floor(random() * gridWidth) };
     case 'left':
-      return { row: Math.floor(random() * gridHeight), col: -1 };
+      return { row: Math.floor(random() * gridHeight), col: 0 };
     case 'right':
-      return { row: Math.floor(random() * gridHeight), col: gridWidth };
+      return { row: Math.floor(random() * gridHeight), col: gridWidth - 1 };
   }
 }
 
