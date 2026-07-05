@@ -127,34 +127,34 @@ describe('getSpawnPosition', () => {
   const gridWidth = 20;
   const gridHeight = 20;
 
-  it('top edge: row is -1, col is within grid', () => {
+  it('top edge: row is 0, col is within grid', () => {
     const rng = () => 0.5;
     const pos = getSpawnPosition('top', gridWidth, gridHeight, rng);
-    expect(pos.row).toBe(-1);
+    expect(pos.row).toBe(0);
     expect(pos.col).toBeGreaterThanOrEqual(0);
     expect(pos.col).toBeLessThan(gridWidth);
   });
 
-  it('bottom edge: row is gridHeight, col is within grid', () => {
+  it('bottom edge: row is gridHeight - 1, col is within grid', () => {
     const rng = () => 0.5;
     const pos = getSpawnPosition('bottom', gridWidth, gridHeight, rng);
-    expect(pos.row).toBe(gridHeight);
+    expect(pos.row).toBe(gridHeight - 1);
     expect(pos.col).toBeGreaterThanOrEqual(0);
     expect(pos.col).toBeLessThan(gridWidth);
   });
 
-  it('left edge: col is -1, row is within grid', () => {
+  it('left edge: col is 0, row is within grid', () => {
     const rng = () => 0.5;
     const pos = getSpawnPosition('left', gridWidth, gridHeight, rng);
-    expect(pos.col).toBe(-1);
+    expect(pos.col).toBe(0);
     expect(pos.row).toBeGreaterThanOrEqual(0);
     expect(pos.row).toBeLessThan(gridHeight);
   });
 
-  it('right edge: col is gridWidth, row is within grid', () => {
+  it('right edge: col is gridWidth - 1, row is within grid', () => {
     const rng = () => 0.5;
     const pos = getSpawnPosition('right', gridWidth, gridHeight, rng);
-    expect(pos.col).toBe(gridWidth);
+    expect(pos.col).toBe(gridWidth - 1);
     expect(pos.row).toBeGreaterThanOrEqual(0);
     expect(pos.row).toBeLessThan(gridHeight);
   });
