@@ -39,6 +39,7 @@ main.gd._physics_process(delta):
     1. SpawnManager.update(delta)            — spawn enemies on interval
     2. PathfindingManager.update_if_dirty()  — recalculate paths if grid changed
     3. CombatManager.update(delta)           — tower targeting + projectile movement
+    4. _connect_new_enemy_signals()          — wire died/reached_core for new enemies
     (enemies self-update via their own _physics_process)
 ```
 

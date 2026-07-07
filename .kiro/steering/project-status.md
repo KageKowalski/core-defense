@@ -43,7 +43,7 @@ The Godot 4.7 conversion is feature-complete. All 16 requirement areas from the 
 
 ## Known Issues
 
-- None currently tracked. File issues as they arise.
+- `GameState.structure_destroyed` signal is connected in `main.gd` (for VFX) but is never emitted anywhere. Structure destruction VFX does not trigger.
 
 ## Origin
 
