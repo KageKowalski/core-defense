@@ -1,0 +1,93 @@
+[gd_scene load_steps=17 format=3 uid="uid://m41nsc3n3r00t"]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main_script"]
+[ext_resource type="Script" path="res://scripts/managers/grid_manager.gd" id="2_grid_manager"]
+[ext_resource type="Script" path="res://scripts/managers/pathfinding_manager.gd" id="3_pathfinding_manager"]
+[ext_resource type="Script" path="res://scripts/managers/spawn_manager.gd" id="4_spawn_manager"]
+[ext_resource type="Script" path="res://scripts/managers/combat_manager.gd" id="5_combat_manager"]
+[ext_resource type="Script" path="res://scripts/managers/phase_manager.gd" id="6_phase_manager"]
+[ext_resource type="Script" path="res://scripts/managers/vfx_manager.gd" id="7_vfx_manager"]
+[ext_resource type="Script" path="res://scripts/camera/game_camera.gd" id="8_game_camera"]
+[ext_resource type="PackedScene" uid="uid://cr1t1c4lr3s0urc3" path="res://scenes/entities/critical_resource.tscn" id="9_critical_resource"]
+[ext_resource type="PackedScene" uid="uid://hud5c3n3f1l3" path="res://scenes/ui/hud.tscn" id="10_hud"]
+[ext_resource type="PackedScene" uid="uid://shp4n3lsc3n3" path="res://scenes/ui/shop_panel.tscn" id="11_shop_panel"]
+[ext_resource type="PackedScene" uid="uid://ctx5m3nu5c3n3" path="res://scenes/ui/context_menu.tscn" id="12_context_menu"]
+[ext_resource type="PackedScene" uid="uid://gm0v3rscr33n" path="res://scenes/ui/game_over_screen.tscn" id="13_game_over_screen"]
+[ext_resource type="PackedScene" uid="uid://strtwv3btn01" path="res://scenes/ui/start_wave_button.tscn" id="14_start_wave_button"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_ground"]
+size = Vector2(20, 20)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
+albedo_color = Color(0.15, 0.35, 0.12, 1)
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_main_script")
+
+[node name="GridManager" type="Node3D" parent="."]
+script = ExtResource("2_grid_manager")
+pathfinding_manager_path = NodePath("../PathfindingManager")
+
+[node name="PathfindingManager" type="Node" parent="."]
+script = ExtResource("3_pathfinding_manager")
+grid_manager_path = NodePath("../GridManager")
+
+[node name="SpawnManager" type="Node" parent="."]
+script = ExtResource("4_spawn_manager")
+pathfinding_manager_path = NodePath("../PathfindingManager")
+enemies_container_path = NodePath("../EnemiesContainer")
+
+[node name="CombatManager" type="Node" parent="."]
+script = ExtResource("5_combat_manager")
+projectiles_container_path = NodePath("../ProjectilesContainer")
+spawn_manager_path = NodePath("../SpawnManager")
+
+[node name="PhaseManager" type="Node" parent="."]
+script = ExtResource("6_phase_manager")
+spawn_manager_path = NodePath("../SpawnManager")
+grid_manager_path = NodePath("../GridManager")
+
+[node name="VFXManager" type="Node3D" parent="."]
+script = ExtResource("7_vfx_manager")
+
+[node name="GameCamera" type="Camera3D" parent="."]
+script = ExtResource("8_game_camera")
+current = true
+
+[node name="StructuresContainer" type="Node3D" parent="."]
+
+[node name="EnemiesContainer" type="Node3D" parent="."]
+
+[node name="ProjectilesContainer" type="Node3D" parent="."]
+
+[node name="CriticalResource" parent="." instance=ExtResource("9_critical_resource")]
+
+[node name="GroundPlane" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 10)
+mesh = SubResource("PlaneMesh_ground")
+surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+
+[node name="GridOverlay" type="Node3D" parent="."]
+
+[node name="AmbientLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 20, 0)
+light_color = Color(0.9, 0.9, 0.95, 1)
+light_energy = 0.4
+shadow_enabled = false
+
+[node name="DirectionalLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 15, 20, 15)
+light_energy = 1.0
+shadow_enabled = true
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+
+[node name="HUD" parent="UILayer" instance=ExtResource("10_hud")]
+
+[node name="ShopPanel" parent="UILayer" instance=ExtResource("11_shop_panel")]
+
+[node name="ContextMenu" parent="UILayer" instance=ExtResource("12_context_menu")]
+
+[node name="GameOverScreen" parent="UILayer" instance=ExtResource("13_game_over_screen")]
+
+[node name="StartWaveButton" parent="UILayer" instance=ExtResource("14_start_wave_button")]
