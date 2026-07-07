@@ -102,19 +102,23 @@ func _get_enemies_in_range(tower) -> Array:
 ## Called when a tower fires a projectile at a target.
 ## Instantiates a projectile, positions it at the tower, initializes with target/damage/aoe.
 func _on_tower_fired(tower: BaseTower, target: BaseEnemy) -> void:
+	if not is_instance_valid(tower) or not tower.is_inside_tree():
+		return
 	if not is_instance_valid(target):
 		return
 
 	var projectile: Node3D = PROJECTILE_SCENE.instantiate()
-	projectile.global_position = tower.global_position
 
 	var is_aoe: bool = tower.aoe_radius > 0.0
 	projectile.initialize(target, tower.damage, is_aoe, tower.aoe_radius)
 
+	# Add to tree FIRST, then set global_position (requires being in tree)
 	if _projectiles_container:
 		_projectiles_container.add_child(projectile)
 	else:
 		add_child(projectile)
+
+	projectile.global_position = tower.global_position
 
 
 ## Called when an enemy dies. Awards bounty, emits signals, decrements remaining.

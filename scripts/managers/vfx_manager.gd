@@ -9,14 +9,17 @@ extends Node3D
 ## Spawns floating text at the given world position.
 ## Text rises upward and fades over 1 second before auto-freeing.
 func spawn_floating_text(world_pos: Vector3, text: String, color: Color) -> void:
+	if not is_inside_tree():
+		return
+
 	var label := Label3D.new()
 	label.text = text
 	label.modulate = color
 	label.font_size = 32
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.no_depth_test = true
-	label.global_position = world_pos + Vector3(0, 1.5, 0)
 	add_child(label)
+	label.global_position = world_pos + Vector3(0, 1.5, 0)
 
 	# Tween upward movement + fade out
 	var tween := create_tween()
