@@ -20,7 +20,7 @@ Complete mapping of all signals in the project, their emitters, and their listen
 | `enemy_reached_core`  | `damage: int`                       | CombatManager         | (currently unused externally)        |
 | `structure_placed`    | `structure_node: Node`              | GridManager           | (available for future use)           |
 | `structure_sold`      | `position: Vector2i, refund: int`   | GridManager           | (available for future use)           |
-| `structure_destroyed` | `position: Vector2i`                | (not yet wired)       | main.gd (VFX)                        |
+| `structure_destroyed` | `position: Vector2i`                | (defined but never emitted) | main.gd (VFX — connected but never fires) |
 | `wave_complete`       | `wave_number: int`                  | PhaseManager          | (available for future use)           |
 
 ## GridManager Signals
@@ -44,6 +44,8 @@ Complete mapping of all signals in the project, their emitters, and their listen
 | `died`          | BaseEnemy     | `enemy: BaseEnemy`                | CombatManager   |
 | `reached_core`  | BaseEnemy     | `enemy: BaseEnemy, damage: int`   | CombatManager   |
 | `destroyed`     | BaseStructure | `structure: BaseStructure`        | (available)     |
+| `hit`           | Projectile    | `projectile: Node3D, target: BaseEnemy` | (emitted but not externally connected) |
+| `aoe_hit`       | Projectile    | `projectile: Node3D, position: Vector3, radius: float, damage: int` | (emitted but not externally connected) |
 
 ## UI Signals
 

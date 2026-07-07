@@ -211,23 +211,24 @@ func _spawn_enemy() -> void:
 		var enemy_scene: PackedScene = ENEMY_SCENES[enemy_type]
 		var enemy_instance: Node = enemy_scene.instantiate()
 
-		# Set enemy grid position and world position
+		# Set enemy grid position
 		if "grid_position" in enemy_instance:
 			enemy_instance.grid_position = position
-		if enemy_instance is Node3D:
-			enemy_instance.global_position = Vector3(
-				position.x + 0.5, 0.25, position.y + 0.5
-			)
 
-		# Assign path
+		# Assign path before adding to tree (doesn't require tree access)
 		if enemy_instance.has_method("set_path") and not path.is_empty():
 			enemy_instance.set_path(path)
 
-		# Add to enemies container or scene tree
+		# Add to tree FIRST, then set global_position (requires being in tree)
 		if _enemies_container:
 			_enemies_container.add_child(enemy_instance)
 		else:
 			add_child(enemy_instance)
+
+		if enemy_instance is Node3D:
+			enemy_instance.global_position = Vector3(
+				position.x + 0.5, 0.25, position.y + 0.5
+			)
 
 	_spawn_index += 1
 

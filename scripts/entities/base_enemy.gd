@@ -42,7 +42,8 @@ func take_damage(amount: int) -> void:
 	if current_health <= 0:
 		current_health = 0
 		died.emit(self)
-		queue_free()
+		# Deferred free so signal handlers can still access global_position this frame
+		call_deferred("queue_free")
 
 
 func set_path(new_path: PackedVector2Array) -> void:

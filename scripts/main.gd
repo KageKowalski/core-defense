@@ -174,7 +174,7 @@ func _on_phase_changed(_old_phase: StringName, new_phase: StringName) -> void:
 
 
 func _on_enemy_killed_vfx(enemy: Node, bounty: int) -> void:
-	if is_instance_valid(enemy) and enemy is Node3D:
+	if is_instance_valid(enemy) and enemy is Node3D and enemy.is_inside_tree():
 		vfx_manager.spawn_floating_text(
 			enemy.global_position,
 			"+%d" % bounty,
