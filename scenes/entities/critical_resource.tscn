@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://cr1t1c4lr3s0urc3"]
+
+[ext_resource type="Script" path="res://scripts/entities/critical_resource.gd" id="1_script"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gold"]
+albedo_color = Color(1, 0.84, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_core"]
+size = Vector3(2, 1.5, 2)
+material = SubResource("StandardMaterial3D_gold")
+
+[node name="CriticalResource" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 10)
+script = ExtResource("1_script")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+mesh = SubResource("BoxMesh_core")
