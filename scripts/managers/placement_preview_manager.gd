@@ -103,6 +103,94 @@ func set_active_type(structure_type: String) -> void:
 	_ghost_instance.visible = false
 
 
+## Called by main.gd when the shop selection is cleared. Frees the ghost preview,
+## resets active type, and clears the range highlight overlay.
+## Requirements: 1.4
+func clear_active_type() -> void:
+	if is_instance_valid(_ghost_instance):
+		_ghost_instance.queue_free()
+		_ghost_instance = null
+
+	_active_type = ""
+
+	if is_instance_valid(_range_mesh) and _range_mesh.mesh != null:
+		_range_mesh.mesh.clear_surfaces()
+
+	_last_highlighted_cells.clear()
+
+
+## Called by main.gd every _process frame with the current hovered grid cell.
+## Handles ghost visibility, range highlight for shop selection, and range display
+## for placed structure hover.
+## Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 2.3, 3.1, 3.2, 4.2
+func update_hover(cell: Vector2i) -> void:
+	_hovered_cell = cell
+
+	if not is_instance_valid(_grid_manager):
+		return
+
+	# --- Shop selection mode (active type set) ---
+	if _active_type != "":
+		var ghost_visible := false
+
+		# Validate cell: not invalid sentinel, in-bounds, and unoccupied
+		if cell != Vector2i(-1, -1):
+			var cell_data: Dictionary = _grid_manager.get_cell(cell)
+			if not cell_data.is_empty() and cell_data["occupant"] == null:
+				ghost_visible = true
+
+		if ghost_visible:
+			# Position and show ghost
+			if is_instance_valid(_ghost_instance):
+				_ghost_instance.position = _grid_manager.grid_to_world(cell)
+				_ghost_instance.visible = true
+
+			# Compute and show range highlight if structure has range
+			var attack_range: float = get_structure_range_from_config(_active_type)
+			if attack_range > 0:
+				var cells_in_range: Array[Vector2i] = compute_cells_in_range(cell, attack_range)
+				if cells_in_range != _last_highlighted_cells:
+					_last_highlighted_cells = cells_in_range
+					_rebuild_range_mesh(cells_in_range)
+			else:
+				# Structure has no range (e.g. barrier) — clear any existing highlight
+				if not _last_highlighted_cells.is_empty():
+					_last_highlighted_cells.clear()
+					_rebuild_range_mesh([])
+		else:
+			# Hide ghost
+			if is_instance_valid(_ghost_instance):
+				_ghost_instance.visible = false
+
+			# Clear range highlight
+			if not _last_highlighted_cells.is_empty():
+				_last_highlighted_cells.clear()
+				_rebuild_range_mesh([])
+		return
+
+	# --- Placed structure hover mode (no active type) ---
+	if cell == Vector2i(-1, -1):
+		if not _last_highlighted_cells.is_empty():
+			_last_highlighted_cells.clear()
+			_rebuild_range_mesh([])
+		return
+
+	var structure: Node = _grid_manager.get_structure_at(cell)
+	if structure != null:
+		var placed_range: float = get_placed_structure_range(structure)
+		if placed_range > 0:
+			var cells_in_range: Array[Vector2i] = compute_cells_in_range(cell, placed_range)
+			if cells_in_range != _last_highlighted_cells:
+				_last_highlighted_cells = cells_in_range
+				_rebuild_range_mesh(cells_in_range)
+			return
+
+	# No structure or range ≤ 0 — clear range mesh
+	if not _last_highlighted_cells.is_empty():
+		_last_highlighted_cells.clear()
+		_rebuild_range_mesh([])
+
+
 ## Called when the game phase changes. Hides all previews if leaving Preparation phase.
 ## Requirements: 1.4, 2.3
 func on_phase_changed(old_phase: StringName, new_phase: StringName) -> void:
@@ -170,6 +258,36 @@ func _create_range_material() -> StandardMaterial3D:
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	return mat
+
+
+## Rebuilds the range highlight mesh from a set of grid cells.
+## Clears any existing surface, then draws two triangles per cell forming quads at y=0.015.
+## Requirements: 2.1, 2.2, 3.1
+func _rebuild_range_mesh(cells: Array[Vector2i]) -> void:
+	var mesh: ImmediateMesh = _range_mesh.mesh as ImmediateMesh
+	mesh.clear_surfaces()
+
+	if cells.is_empty():
+		return
+
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES)
+	for cell in cells:
+		var x0: float = float(cell.x)
+		var z0: float = float(cell.y)
+		var x1: float = x0 + 1.0
+		var z1: float = z0 + 1.0
+		var y: float = 0.015
+
+		# First triangle
+		mesh.surface_add_vertex(Vector3(x0, y, z0))
+		mesh.surface_add_vertex(Vector3(x1, y, z0))
+		mesh.surface_add_vertex(Vector3(x1, y, z1))
+
+		# Second triangle
+		mesh.surface_add_vertex(Vector3(x0, y, z0))
+		mesh.surface_add_vertex(Vector3(x1, y, z1))
+		mesh.surface_add_vertex(Vector3(x0, y, z1))
+	mesh.surface_end()
 
 
 ## Applies a translucent unshaded material override recursively to all MeshInstance3D
