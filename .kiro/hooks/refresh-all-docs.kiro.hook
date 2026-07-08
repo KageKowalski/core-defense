@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Refresh All Documentation",
+  "description": "Manually triggered hook that performs a comprehensive review of the entire codebase and updates all documentation files in .kiro/steering/ and .kiro/docs/ to accurately reflect the current state of the project.",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Perform a full documentation refresh. First, discover ALL documentation files by listing the contents of .kiro/steering/ and .kiro/docs/ directories. Do NOT rely on a hardcoded list — new files may have been added since this hook was written.\n\nFor EVERY .md file found in those directories, read its current content, then cross-reference it against the actual codebase to verify accuracy. Update each file where the documentation has drifted from reality.\n\nGeneral guidance per file type:\n- Project status files: Audit completed/incomplete items and known issues against actual code.\n- Architecture files: Verify autoloads, managers, entity hierarchy, pipelines, signals, groups, and directory layout.\n- Signal maps: Cross-reference all signal definitions and connections in the codebase.\n- System descriptions: Verify gameplay system details match implementation.\n- Build/run instructions: Verify commands, autoloads, and test instructions are current.\n- Coding standards: Verify conventions match what's actually used.\n- UI pattern docs: Verify patterns match current UI implementation.\n- Glossaries: Add any new terms introduced in the codebase.\n- Scene references: Verify scene trees match actual .tscn files.\n- How-to guides: Verify guides match current patterns and workflows.\n- Balance references: Verify values match GameConfig.\n\nRead the relevant source files to confirm accuracy before making updates. Make corrections wherever documentation has drifted from reality."
+  }
+}

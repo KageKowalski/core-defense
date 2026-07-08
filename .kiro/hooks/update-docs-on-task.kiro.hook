@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Update Docs on Task Complete",
+  "description": "After a spec task is completed, reviews the changes made and updates any relevant documentation in .kiro/steering/ and .kiro/docs/ (e.g., project-status.md, architecture.md, signal-map.md) to reflect the new state of the project.",
+  "version": "1",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A spec task was just completed. Review the changes that were made during this task, then discover ALL documentation files by listing the contents of .kiro/steering/ and .kiro/docs/ directories. Do NOT rely on a hardcoded list — new files may have been added since this hook was written.\n\nFor each documentation file found, determine whether the task's changes are relevant to that document. If so, read the doc, verify it against the current codebase, and update it. If the task's changes don't affect a given document, skip it.\n\nCommon updates to look for:\n- Project status: Move completed items, update \"Not Yet Implemented\" and \"Known Issues\".\n- Architecture: Update if new managers, entities, autoloads, groups, or structural changes were introduced.\n- Signal maps: Update if new signals were added or connections changed.\n- Scene references: Update if new scenes or nodes were added.\n- How-to guides: Update if new patterns were introduced.\n- System descriptions: Update if gameplay systems were added or modified.\n- Glossaries: Add new terms if any were introduced.\n- Balance references: Update if config values changed.\n\nOnly update files where the task's changes are actually relevant. Do not make changes if nothing meaningful changed for that document."
+  }
+}
