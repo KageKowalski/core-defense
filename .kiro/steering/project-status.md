@@ -29,13 +29,13 @@ The Godot 4.7 conversion is feature-complete. All 16 requirement areas from the 
 - [x] Input handling (screen-to-grid raycasting, placement, context menu)
 - [x] Grid overlay (semi-transparent lines, visible during Preparation only)
 - [x] Main scene wiring (signal connections, physics pipeline)
+- [x] PlacementPreviewManager (ghost preview, range highlighting during Preparation)
 
 ## Not Yet Implemented
 
-- [ ] Property-based tests (GdUnit4) — marked as optional in the task plan
+- [ ] Property-based tests (GdUnit4) — GdUnit4 installed, optional PBT tests defined but not written
 - [ ] Custom `.tres` resource files (currently using dictionary-based config in GameConfig)
 - [ ] Sound effects / music
-- [ ] Hover preview (ghost structure before placement)
 - [ ] Tower upgrade system
 - [ ] Additional enemy types beyond Basic and Brute
 - [ ] Difficulty settings
