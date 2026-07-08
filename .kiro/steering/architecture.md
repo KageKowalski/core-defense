@@ -21,16 +21,17 @@ Three autoloads provide shared state and configuration:
 
 ## Manager Nodes (in main.tscn)
 
-Six manager nodes handle distinct gameplay systems:
+Seven manager nodes handle distinct gameplay systems:
 
-| Manager            | Responsibility                                                     |
-|--------------------|--------------------------------------------------------------------|
-| GridManager        | 20×20 grid model, cell occupancy, structure placement/sell/repair  |
-| PathfindingManager | AStarGrid2D (4-dir, no diagonals), dirty-flag recalculation, sealed-core detection |
-| SpawnManager       | Wave composition, staggered spawning, edge selection               |
-| CombatManager      | Tower targeting, projectile creation, damage resolution            |
-| PhaseManager       | Phase state machine (Preparation, Combat, Game_Over)               |
-| VFXManager         | Floating text, destruction particles, invalid placement indicators |
+| Manager                  | Responsibility                                                     |
+|--------------------------|--------------------------------------------------------------------|
+| GridManager              | 20×20 grid model, cell occupancy, structure placement/sell/repair  |
+| PathfindingManager       | AStarGrid2D (4-dir, no diagonals), dirty-flag recalculation, sealed-core detection |
+| SpawnManager             | Wave composition, staggered spawning, edge selection               |
+| CombatManager            | Tower targeting, projectile creation, damage resolution            |
+| PhaseManager             | Phase state machine (Preparation, Combat, Game_Over)               |
+| VFXManager               | Floating text, destruction particles, invalid placement indicators |
+| PlacementPreviewManager  | Ghost structure preview + range highlight overlay during Preparation |
 
 ## Physics Process Pipeline (per frame)
 
@@ -61,11 +62,19 @@ Projectile (Node3D)
 CriticalResource (Node3D)
 ```
 
+## Visual Update Pipeline (per frame)
+
+```
+main.gd._process(delta):
+    1. Raycast mouse → grid cell
+    2. PlacementPreviewManager.update_hover(cell)  — ghost preview + range highlight
+```
+
 ## Signal-Driven Communication
 
 Systems communicate through Godot signals rather than direct function calls:
 
-- `GameState.phase_changed` → UI visibility, grid overlay, start wave button
+- `GameState.phase_changed` → UI visibility, grid overlay, start wave button, PlacementPreviewManager cleanup
 - `GameState.gold_changed` → HUD gold label, shop button affordability
 - `GameState.core_damaged` → HUD health bar, critical resource color
 - `GameState.game_over_triggered` → Game over screen
@@ -107,7 +116,7 @@ core-defense/
 ├── scripts/
 │   ├── main.gd
 │   ├── autoloads/   (game_config, game_state, economy)
-│   ├── managers/    (grid, pathfinding, spawn, combat, phase, vfx)
+│   ├── managers/    (grid, pathfinding, spawn, combat, phase, vfx, placement_preview)
 │   ├── entities/    (base_structure, barrier, base_tower, towers, base_enemy, enemies, projectile, critical_resource)
 │   ├── ui/          (hud, shop_panel, context_menu, game_over_screen, start_wave_button)
 │   └── camera/      (game_camera)

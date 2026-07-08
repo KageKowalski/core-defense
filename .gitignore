@@ -1,6 +1,9 @@
 # Godot 4+ specific ignores
 .godot/
 
+# Addons (installed locally, not tracked in repo)
+addons/
+
 # Exported builds
 export/
 *.export.cfg

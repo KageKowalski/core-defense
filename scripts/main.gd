@@ -11,6 +11,7 @@ extends Node3D
 @onready var combat_manager: Node = $CombatManager
 @onready var phase_manager: Node = $PhaseManager
 @onready var vfx_manager: Node3D = $VFXManager
+@onready var placement_preview_manager: Node3D = $PlacementPreviewManager
 @onready var game_camera: Camera3D = $GameCamera
 
 # --- Container References ---
@@ -40,6 +41,9 @@ func _ready() -> void:
 	# Connect phase_changed to control grid overlay visibility
 	GameState.phase_changed.connect(_on_phase_changed)
 
+	# Connect phase_changed to placement preview manager for phase-aware visibility
+	GameState.phase_changed.connect(placement_preview_manager.on_phase_changed)
+
 	# Connect VFX triggers
 	GameState.enemy_killed.connect(_on_enemy_killed_vfx)
 	GameState.structure_destroyed.connect(_on_structure_destroyed_vfx)
@@ -54,6 +58,13 @@ func _physics_process(delta: float) -> void:
 
 	# Connect signals for any newly spawned enemies
 	_connect_new_enemy_signals()
+
+
+func _process(_delta: float) -> void:
+	# Forward hovered cell to placement preview for ghost/range display (visual-only)
+	var mouse_pos := get_viewport().get_mouse_position()
+	var grid_pos := _screen_to_grid(mouse_pos)
+	placement_preview_manager.update_hover(grid_pos)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -135,6 +146,7 @@ func _handle_left_click(grid_pos: Vector2i) -> void:
 func _clear_selection() -> void:
 	_selected_structure_type = ""
 	context_menu.hide_menu()
+	placement_preview_manager.clear_active_type()
 
 
 # --- Signal Callbacks ---
@@ -142,10 +154,12 @@ func _clear_selection() -> void:
 func _on_structure_selected(structure_type: String) -> void:
 	_selected_structure_type = structure_type
 	context_menu.hide_menu()
+	placement_preview_manager.set_active_type(structure_type)
 
 
 func _on_selection_cleared() -> void:
 	_selected_structure_type = ""
+	placement_preview_manager.clear_active_type()
 
 
 func _on_placement_succeeded(_position: Vector2i, _structure_type: String) -> void:

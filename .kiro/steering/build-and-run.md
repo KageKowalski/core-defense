@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - Godot 4.7 (stable) installed and available on PATH as `godot` (or via Godot editor).
-- No external plugins or dependencies required.
+- GdUnit4 addon installed locally for testing (see Testing section below).
 
 ## Running the Game
 
@@ -34,11 +34,26 @@ Key settings in `project.godot`:
 
 ## Testing
 
-Tests are not yet set up. When added, they will use GdUnit4:
+GdUnit4 is used for unit and property-based testing.
+
+**Important:** The `addons/` folder is local-only and ignored by git (via `.gitignore`). It is not included in the remote repository. Each developer must install GdUnit4 locally.
+
+### Installing GdUnit4
+
+1. Open the Godot editor with this project.
+2. Go to AssetLib → search "GdUnit4" → install it.
+3. Enable the plugin: Project → Project Settings → Plugins → GdUnit4 → Enable.
+
+The addon installs to `addons/gdUnit4/` which is already in `.gitignore`.
+
+### Running Tests
+
 ```bash
-# Run all tests (once GdUnit4 is installed)
+# Run all tests from command line
 godot --headless --script res://addons/gdUnit4/bin/GdUnitCmdTool.gd --run-all
 ```
+
+Or use the GdUnit4 panel inside the Godot editor.
 
 ## Export
 
